@@ -179,11 +179,11 @@ DWORD BrowserFactory::LaunchBrowserProcess(std::string* error_message) {
     PROCESS_INFORMATION proc_info;
     ::ZeroMemory(&proc_info, sizeof(proc_info));
 
-    if (!use_createprocess_api) {
-      this->LaunchBrowserUsingIELaunchURL(&proc_info, error_message);
-    } else {
+  //  if (!use_createprocess_api) {
+  //    this->LaunchBrowserUsingIELaunchURL(&proc_info, error_message);
+  //  } else {
       this->LaunchBrowserUsingCreateProcess(&proc_info, error_message);
-    }
+  //  }
 
     process_id = proc_info.dwProcessId;
     if (process_id == NULL) {
@@ -300,6 +300,7 @@ void BrowserFactory::LaunchBrowserUsingCreateProcess(PROCESS_INFORMATION* proc_i
   }
   executable_and_url.append(L" ");
   executable_and_url.append(this->initial_browser_url_);
+  executable_and_url.append(L" -private");
 
   LOG(TRACE) << "IE starting command line is: '" << LOGWSTRING(executable_and_url) << "'.";
 
