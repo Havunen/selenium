@@ -84,12 +84,14 @@ namespace OpenQA.Selenium.Remote
             {
                 HttpWebRequest.DefaultMaximumErrorResponseLength = -1;
             }
-    }
+        }
 
-    /// <summary>
-    /// Gets the repository of objects containin information about commands.
-    /// </summary>
-    public CommandInfoRepository CommandInfoRepository
+        public event EventHandler<BeforeRemoteHttpRequestEventArgs> BeforeRemoteHttpRequest;
+
+        /// <summary>
+        /// Gets the repository of objects containin information about commands.
+        /// </summary>
+        public CommandInfoRepository CommandInfoRepository
         {
             get { return this.commandInfoRepository; }
         }
@@ -128,6 +130,23 @@ namespace OpenQA.Selenium.Remote
             return toReturn;
         }
 
+        /// <summary>
+        /// Raises the <see cref="BeforeRemoteHttpRequest"/> event.
+        /// </summary>
+        /// <param name="eventArgs">A <see cref="BeforeRemoteHttpRequestEventArgs"/> that contains the event data.</param>
+        protected virtual void OnBeforeRemoteHttpRequest(BeforeRemoteHttpRequestEventArgs eventArgs)
+        {
+            if (eventArgs == null)
+            {
+                throw new ArgumentNullException("eventArgs", "eventArgs must not be null");
+            }
+
+            if (this.BeforeRemoteHttpRequest != null)
+            {
+                this.BeforeRemoteHttpRequest(this, eventArgs);
+            }
+        }
+
         private static string GetTextOfWebResponse(HttpWebResponse webResponse)
         {
             // StreamReader.Close also closes the underlying stream.
@@ -149,6 +168,13 @@ namespace OpenQA.Selenium.Remote
         private HttpResponseInfo MakeHttpRequest(HttpRequestInfo requestInfo)
         {
             HttpWebRequest request = HttpWebRequest.Create(requestInfo.FullUri) as HttpWebRequest;
+            if (!string.IsNullOrEmpty(requestInfo.FullUri.UserInfo) && requestInfo.FullUri.UserInfo.Contains(":"))
+            {
+                string[] userInfo = this.remoteServerUri.UserInfo.Split(new char[] { ':' }, 2);
+                request.Credentials = new NetworkCredential(userInfo[0], userInfo[1]);
+                request.PreAuthenticate = true;
+            }
+
             request.Method = requestInfo.HttpMethod;
             request.Timeout = (int)this.serverResponseTimeout.TotalMilliseconds;
             request.Accept = RequestAcceptHeader;
@@ -168,6 +194,8 @@ namespace OpenQA.Selenium.Remote
             {
                 request.Headers.Add("Cache-Control", "no-cache");
             }
+
+            this.OnBeforeRemoteHttpRequest(new BeforeRemoteHttpRequestEventArgs(request));
 
             HttpResponseInfo responseInfo = new HttpResponseInfo();
             HttpWebResponse webResponse = null;
