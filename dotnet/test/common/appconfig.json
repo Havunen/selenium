@@ -19,6 +19,13 @@
       "RemoteCapabilities": "chrome"
     },
 
+    "ChromeSpec": {
+      "DriverTypeName": "OpenQA.Selenium.Chrome.SpecCompliantChromeDriver",
+      "AssemblyName": "WebDriver.Chrome.Tests",
+      "BrowserValue": "Chrome",
+      "RemoteCapabilities": "chrome"
+    },
+
     "IE": {
       "DriverTypeName": "OpenQA.Selenium.IE.InternetExplorerDriver",
       "AssemblyName": "WebDriver",
@@ -57,6 +64,13 @@
     "Safari": {
       "DriverTypeName": "OpenQA.Selenium.Safari.SafariDriver",
       "AssemblyName": "WebDriver",
+      "BrowserValue": "Safari",
+      "RemoteCapabilities": "safari"
+    },
+
+    "SafariTechPreview": {
+      "DriverTypeName": "OpenQA.Selenium.Safari.SafariTechnologyPreviewDriver",
+      "AssemblyName": "WebDriver.Safari.Tests",
       "BrowserValue": "Safari",
       "RemoteCapabilities": "safari"
     },

@@ -22,6 +22,7 @@ using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using OpenQA.Selenium.Internal;
 
 namespace OpenQA.Selenium.Remote
 {
@@ -35,9 +36,11 @@ namespace OpenQA.Selenium.Remote
         private const string CharsetType = "charset=utf-8";
         private const string ContentTypeHeader = JsonMimeType + ";" + CharsetType;
         private const string RequestAcceptHeader = JsonMimeType + ", " + PngMimeType;
+        private const string UserAgentHeaderTemplate = "selenium/{0} (.net {1})";
         private Uri remoteServerUri;
         private TimeSpan serverResponseTimeout;
         private bool enableKeepAlive;
+        private bool isDisposed;
         private CommandInfoRepository commandInfoRepository = new WebDriverWireProtocolCommandInfoRepository();
 
         /// <summary>
@@ -84,6 +87,8 @@ namespace OpenQA.Selenium.Remote
             {
                 HttpWebRequest.DefaultMaximumErrorResponseLength = -1;
             }
+
+
         }
 
         public event EventHandler<BeforeRemoteHttpRequestEventArgs> BeforeRemoteHttpRequest;
@@ -175,6 +180,8 @@ namespace OpenQA.Selenium.Remote
                 request.PreAuthenticate = true;
             }
 
+            string userAgentString = string.Format(CultureInfo.InvariantCulture, UserAgentHeaderTemplate, ResourceUtilities.AssemblyVersion, ResourceUtilities.PlatformFamily);
+            request.UserAgent = userAgentString;
             request.Method = requestInfo.HttpMethod;
             request.Timeout = (int)this.serverResponseTimeout.TotalMilliseconds;
             request.Accept = RequestAcceptHeader;
@@ -284,6 +291,28 @@ namespace OpenQA.Selenium.Remote
             }
 
             return commandResponse;
+        }
+
+        /// <summary>
+        /// Releases all resources used by the <see cref="HttpCommandExecutor"/>.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the <see cref="HttpCommandExecutor"/> and
+        /// optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> to release managed and resources;
+        /// <see langword="false"/> to only release unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.isDisposed)
+            {
+                this.isDisposed = true;
+            }
         }
 
         private class HttpRequestInfo
